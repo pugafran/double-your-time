@@ -1,5 +1,5 @@
 google.json
-openai.txt
+*.txt
 
 .DS_Store
 .vscode/
