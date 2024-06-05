@@ -1,0 +1,7 @@
+google.json
+openai.txt
+
+.DS_Store
+.vscode/
+*.mp3
+*pdf

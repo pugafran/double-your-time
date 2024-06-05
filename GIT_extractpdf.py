@@ -1,6 +1,8 @@
 import fitz  # PyMuPDF
 import re
-import openai
+from openai import OpenAI
+
+
 from gtts import gTTS
 import os
 import time
@@ -110,9 +112,11 @@ print(f"Tiempo estimado para procesar {numero_paginas} páginas: {tiempo_estimad
 # Limpieza y división del texto
 texto_limpio = limpiar_texto(ocr_text)
 
-# Configura tu clave API de OpenAI
-openai.api_key = 'API-KEY'
+with open('openai.txt', 'r') as file:
+    api_key = file.readline().strip()
 
+# Configura tu clave API de OpenAI
+client = OpenAI(api_key=api_key)
 # Prepara los datos de la solicitud
 
 segmentos = dividir_texto(texto_limpio)
@@ -123,24 +127,22 @@ cont = 0
 
 start_time_openai = time.time()
 for segmento in segmentos:
-    
+
     if(cont == 0):
         input = "[INICIO] "
         cont = 1
     else:
         input = "[MEDIO] "
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        max_tokens=2500,
-        messages=[
-            {"role": "system", "content": "Tu trabajo es reestructurar los textos (y resumirlos si procede) que te lleguen para que posteriormente un TTS lo reproduzca correctamente, eres un servicio online llamado 'Text to teaching' si te llega un bracket [INICIO] significa que es el inicio del audio que se va a reproducir por lo que puedes dar una introducción, si te llega un bracket [MEDIO] limitate solo a reestructurar, nunca pongas en el texto los brackets inicio y medio, y siempre responde en español. Intenta no omitir información, pero si resumirla de manera que sea ameno y parezca un lenguaje natural."},
-            {"role": "user", "content": input + segmento}
-        ]
-    )
+    response = client.chat.completions.create(model="gpt-3.5-turbo",
+    max_tokens=2500,
+    messages=[
+        {"role": "system", "content": "Tu trabajo es reestructurar los textos (y resumirlos si procede) que te lleguen para que posteriormente un TTS lo reproduzca correctamente, eres un servicio online llamado 'Text to teaching' si te llega un bracket [INICIO] significa que es el inicio del audio que se va a reproducir por lo que puedes dar una introducción, si te llega un bracket [MEDIO] limitate solo a reestructurar, nunca pongas en el texto los brackets inicio y medio, y siempre responde en español. Intenta no omitir información, pero si resumirla de manera que sea ameno y parezca un lenguaje natural."},
+        {"role": "user", "content": input + segmento}
+    ])
 
     # Asegúrate de acceder a la respuesta correctamente
-    respuesta_completa += response.choices[0].message['content'].strip()
+    respuesta_completa += response.choices[0].message.content.strip()
 
 # Imprimir la respuesta completa
 respuesta_completa = limpiar_brackets(respuesta_completa)

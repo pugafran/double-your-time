@@ -1,0 +1,7 @@
+fitz==0.0.1.dev2
+gtts==2.5.1
+openai==1.28.0
+protobuf>=3.19.5,<5.0.0
+pydub==0.25.1
+pymupdf==1.24.3
+google-cloud-texttospeech==2.15.0
